@@ -1,0 +1,27 @@
+# Ignore all .env files (frontend and backend)
+**/.env
+**/.env.*
+
+# Logs
+logs/
+*.log
+
+# Dependency folders (frontend and backend)
+**/node_modules/
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+coverage/
+
+# Editor and OS files
+.vscode/
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
