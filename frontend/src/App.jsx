@@ -11,7 +11,14 @@ import ForumPage from './pages/ForumPage';
 import CollegesPage from './pages/CollegesPage';
 import OtherCollegeProfilePage from './pages/OtherCollegeProfilePage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage'; // NEW: Import ForgotPasswordPage
-import ResetPasswordPage from './pages/ResetPasswordPage'; 
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import AdminLoginPage from './pages/AdminLoginPage';
+import ManageResourcesPage from './pages/admin/ManageResourcesPage'; // NEW
+import ManageEventsPage from './pages/admin/ManageEventsPage';     // NEW
+import ManageForumPostsPage from './pages/admin/ManageForumPostsPage'; // NEW
+import AdminDashboardPage from './pages/AdminDashboardPage';
+import ProtectedAdminRoute from './components/auth/ProtectedAdminRoute';
+
 
 function App() {
   return (
@@ -35,7 +42,16 @@ function App() {
         <Route path="/colleges" element={<MainLayout><CollegesPage /></MainLayout>} />
         <Route path="/colleges/:id" element={<MainLayout><OtherCollegeProfilePage /></MainLayout>} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} /> {/* NEW: Forgot Password route */}
-<Route path="/reset-password/:token" element={<ResetPasswordPage />} /> {/* NEW: Reset Password route */}
+        <Route path="/reset-password/:token" element={<ResetPasswordPage />} /> {/* NEW: Reset Password route */}
+        <Route path="/admin-login" element={<AdminLoginPage />} />
+        <Route element={<ProtectedAdminRoute />}>
+          <Route path="/admin" element={<AdminDashboardPage />} />
+
+          <Route path="/admin/manage-resources" element={<ManageResourcesPage />} /> {/* NEW */}
+          <Route path="/admin/manage-events" element={<ManageEventsPage />} />       {/* NEW */}
+          <Route path="/admin/manage-forum" element={<ManageForumPostsPage />} />   {/* NEW */}
+        </Route>
+
 
         {/* Catch-all for undefined routes - redirect to login or home */}
         {/* Consider redirecting to login if user is not authenticated for any unknown route */}

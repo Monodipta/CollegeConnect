@@ -1,9 +1,10 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_BACKEND_URL;
+const API_URL =
+    import.meta.env.VITE_BACKEND_URL;
 
 // Register college
-const register = async (collegeData) => {
+const register = async(collegeData) => {
     // collegeData will now be a FormData object
     const response = await axios.post(`${API_URL}/auth/register`, collegeData, {
         headers: {
@@ -18,7 +19,7 @@ const register = async (collegeData) => {
 };
 
 // Login college
-const login = async (loginData) => {
+const login = async(loginData) => {
     const response = await axios.post(`${API_URL}/auth/login`, loginData);
     if (response.data.token) {
         localStorage.setItem('collegeUser', JSON.stringify(response.data)); // Updated storage key
@@ -26,18 +27,27 @@ const login = async (loginData) => {
     return response.data;
 };
 
-const forgotPasswordRequest = async (email) => {
-  const response = await axios.post(`${API_URL}/auth/forgot-password`, { email });
-  return response.data;
+const forgotPasswordRequest = async(email) => {
+    const response = await axios.post(`${API_URL}/auth/forgot-password`, { email });
+    return response.data;
 };
 
 // Confirm password reset with token and new password
-const resetPasswordConfirm = async (token, newPassword) => {
-  // ⭐⭐⭐ THIS IS THE CORRECTED LINE ⭐⭐⭐
-  // It MUST start and end with BACKTICKS (`), not single or double quotes.
-  // Variables MUST be enclosed in ${}.
-  const response = await axios.put(`${API_URL}/auth/reset-password/${token}`, { password: newPassword });
-  return response.data;
+const resetPasswordConfirm = async(token, newPassword) => {
+    // ⭐⭐⭐ THIS IS THE CORRECTED LINE ⭐⭐⭐
+    // It MUST start and end with BACKTICKS (`), not single or double quotes.
+    // Variables MUST be enclosed in ${}.
+    const response = await axios.put(`${API_URL}/auth/reset-password/${token}`, { password: newPassword });
+    return response.data;
+};
+
+const adminLogin = async(credentials) => {
+    const response = await axios.post(`${API_URL}/auth/admin-login`, credentials);
+    // Store the admin user data just like a regular college user
+    if (response.data.token) {
+        localStorage.setItem('collegeUser', JSON.stringify(response.data));
+    }
+    return response.data;
 };
 
 // Logout college
@@ -50,7 +60,8 @@ const authService = {
     login,
     logout,
     forgotPasswordRequest,
-    resetPasswordConfirm
+    resetPasswordConfirm,
+    adminLogin
 };
 
 export default authService;
