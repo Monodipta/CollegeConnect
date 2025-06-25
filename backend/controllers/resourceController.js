@@ -3,13 +3,13 @@ const Resource = require('../models/Resource');
 const College = require('../models/College'); // To get all colleges for notifications
 const Notification = require('../models/Notification'); // To create notifications
 const path = require('path'); // NEW: Import path module for file paths
-const fs = require('fs');     // NEW: Import file system module for checking file existence
+const fs = require('fs'); // NEW: Import file system module for checking file existence
 const mime = require('mime-types');
 
 // @desc    Upload a new resource
 // @route   POST /api/resources
 // @access  Private (College only)
-const uploadResource = asyncHandler(async (req, res) => {
+const uploadResource = asyncHandler(async(req, res) => {
     const { title, description, category } = req.body;
     const file = req.file ? `/uploads/${req.file.filename}` : null; // Get path to uploaded file
 
@@ -70,7 +70,7 @@ const uploadResource = asyncHandler(async (req, res) => {
 // @desc    Get all resources
 // @route   GET /api/resources
 // @access  Private (College only)
-const getResources = asyncHandler(async (req, res) => {
+const getResources = asyncHandler(async(req, res) => {
     // You can add query parameters for filtering by category, search, pagination later
     const resources = await Resource.find({})
         .populate('uploadedBy', 'name logo') // Populate uploader's name and logo
@@ -82,7 +82,7 @@ const getResources = asyncHandler(async (req, res) => {
 // @desc    Get single resource by ID
 // @route   GET /api/resources/:id
 // @access  Private (College only)
-const getResourceById = asyncHandler(async (req, res) => {
+const getResourceById = asyncHandler(async(req, res) => {
     const resource = await Resource.findById(req.params.id)
         .populate('uploadedBy', 'name logo');
 
@@ -97,12 +97,12 @@ const getResourceById = asyncHandler(async (req, res) => {
 // @desc    Delete a resource
 // @route   DELETE /api/resources/:id
 // @access  Private (College only - only uploader can delete)
-const deleteResource = asyncHandler(async (req, res) => {
+const deleteResource = asyncHandler(async(req, res) => {
     const resource = await Resource.findById(req.params.id);
 
     if (resource) {
         // Check if the logged-in college is the uploader
-        if (resource.uploadedBy.toString() !== req.college._id.toString()) {
+        if (resource.uploadedBy.toString() !== req.college._id.toString() || req.college.role !== 'admin') {
             res.status(401);
             throw new Error('Not authorized to delete this resource');
         }
@@ -121,7 +121,7 @@ const deleteResource = asyncHandler(async (req, res) => {
 // @desc    Download a resource file
 // @route   GET /api/resources/download/:id
 // @access  Private (College only)
-const downloadResourceFile = asyncHandler(async (req, res) => {
+const downloadResourceFile = asyncHandler(async(req, res) => {
     const resource = await Resource.findById(req.params.id);
 
     if (resource) {
@@ -148,7 +148,7 @@ const downloadResourceFile = asyncHandler(async (req, res) => {
                     }
                 }
             });
-        }else {
+        } else {
             res.status(404);
             throw new Error('File not found on server');
         }
@@ -164,5 +164,5 @@ module.exports = {
     getResources,
     getResourceById,
     deleteResource,
-     downloadResourceFile,
+    downloadResourceFile,
 };

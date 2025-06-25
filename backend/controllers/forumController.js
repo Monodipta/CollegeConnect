@@ -6,7 +6,7 @@ const Notification = require('../models/Notification'); // To create notificatio
 // @desc    Create a new forum post
 // @route   POST /api/forum
 // @access  Private (College only)
-const createForumPost = asyncHandler(async (req, res) => {
+const createForumPost = asyncHandler(async(req, res) => {
     const { title, content, mentionedCollegeIds = [] } = req.body; // mentionedCollegeIds expected from frontend
 
     const postedByCollegeId = req.college._id;
@@ -71,7 +71,7 @@ const createForumPost = asyncHandler(async (req, res) => {
 // @desc    Get all forum posts
 // @route   GET /api/forum
 // @access  Private (College only)
-const getForumPosts = asyncHandler(async (req, res) => {
+const getForumPosts = asyncHandler(async(req, res) => {
     const forumPosts = await ForumPost.find({})
         .populate('postedBy', 'name logo') // Populate poster's name and logo
         .populate('mentionedColleges', 'name') // Populate mentioned college names
@@ -83,7 +83,7 @@ const getForumPosts = asyncHandler(async (req, res) => {
 // @desc    Get single forum post by ID
 // @route   GET /api/forum/:id
 // @access  Private (College only)
-const getForumPostById = asyncHandler(async (req, res) => {
+const getForumPostById = asyncHandler(async(req, res) => {
     const forumPost = await ForumPost.findById(req.params.id)
         .populate('postedBy', 'name logo')
         .populate('mentionedColleges', 'name');
@@ -99,14 +99,14 @@ const getForumPostById = asyncHandler(async (req, res) => {
 // @desc    Update a forum post
 // @route   PUT /api/forum/:id
 // @access  Private (College only - only poster can update)
-const updateForumPost = asyncHandler(async (req, res) => {
+const updateForumPost = asyncHandler(async(req, res) => {
     const { title, content, mentionedCollegeIds = [] } = req.body;
 
     const forumPost = await ForumPost.findById(req.params.id);
 
     if (forumPost) {
         // Check if the logged-in college is the poster
-        if (forumPost.postedBy.toString() !== req.college._id.toString()) {
+        if (forumPost.postedBy.toString() !== req.college._id._id.toString() || req.college.role !== 'admin') { // Check req.college.role
             res.status(401);
             throw new Error('Not authorized to update this post');
         }
@@ -126,12 +126,12 @@ const updateForumPost = asyncHandler(async (req, res) => {
 // @desc    Delete a forum post
 // @route   DELETE /api/forum/:id
 // @access  Private (College only - only poster can delete)
-const deleteForumPost = asyncHandler(async (req, res) => {
+const deleteForumPost = asyncHandler(async(req, res) => {
     const forumPost = await ForumPost.findById(req.params.id);
 
     if (forumPost) {
         // Check if the logged-in college is the poster
-        if (forumPost.postedBy.toString() !== req.college._id.toString()) {
+        if (forumPost.postedBy.toString() !== req.college._id.toString() || req.college.role !== 'admin') {
             res.status(401);
             throw new Error('Not authorized to delete this post');
         }

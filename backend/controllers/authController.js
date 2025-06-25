@@ -3,11 +3,13 @@ const College = require('../models/College'); // Changed from User to College
 const generateToken = require('../utils/generateToken');
 const nodemailer = require('nodemailer'); // NEW: Import nodemailer
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs'); // NEW: Import bcrypt for password comparison
+require('dotenv').config(); // Ensure dotenv is loaded here if needed for env vars directly
 
 // @desc    Register a new college
 // @route   POST /api/auth/register
 // @access  Public
-const registerCollege = asyncHandler(async (req, res) => {
+const registerCollege = asyncHandler(async(req, res) => {
     const { name, email, password, address, city, state, country, description, website, contactNumber } = req.body;
     const logo = req.file ? `/uploads/${req.file.filename}` : undefined; // Get path to uploaded logo
 
@@ -51,7 +53,7 @@ const registerCollege = asyncHandler(async (req, res) => {
 // @desc    Authenticate college & get token
 // @route   POST /api/auth/login
 // @access  Public
-const loginCollege = asyncHandler(async (req, res) => {
+const loginCollege = asyncHandler(async(req, res) => {
     const { email, password } = req.body;
 
     // Check for college by email
@@ -71,7 +73,7 @@ const loginCollege = asyncHandler(async (req, res) => {
         throw new Error('Invalid email or password');
     }
 });
-const forgotPassword = asyncHandler(async (req, res) => {
+const forgotPassword = asyncHandler(async(req, res) => {
     const { email } = req.body;
 
     const college = await College.findOne({ email });
@@ -103,7 +105,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
     try {
         // In a real application, you'd configure and use Nodemailer here
         // Example (requires email config in .env):
-        
+
         const transporter = nodemailer.createTransport({
             service: 'Gmail', // or your email service
             auth: {
@@ -121,7 +123,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
         };
 
         await transporter.sendMail(mailOptions);
-        
+
 
         console.log('--- PASSWORD RESET LINK (FOR TESTING) ---');
         console.log(`To: ${college.email}`);
@@ -145,7 +147,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 // @desc    Reset password (using token)
 // @route   PUT /api/auth/reset-password/:token
 // @access  Public
-const resetPassword = asyncHandler(async (req, res) => {
+const resetPassword = asyncHandler(async(req, res) => {
     // Hash the token from the URL parameter to match the one stored in DB
     const resetPasswordToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
 
@@ -169,4 +171,43 @@ const resetPassword = asyncHandler(async (req, res) => {
     res.status(200).json({ success: true, message: 'Password reset successfully. You can now log in.' });
 });
 
-module.exports = { registerCollege, loginCollege, forgotPassword,resetPassword }; // Export new function names
+const adminLogin = asyncHandler(async(req, res) => {
+    const { username, password } = req.body;
+
+    const SUPER_ADMIN_USERNAME = process.env.SUPER_ADMIN_USERNAME;
+    const SUPER_ADMIN_PASSWORD_HASH = process.env.SUPER_ADMIN_PASSWORD_HASH;
+    const SUPER_ADMIN_ID_PAYLOAD = process.env.SUPER_ADMIN_ID_PAYLOAD;
+
+    // Basic validation
+    if (!username || !password) {
+        res.status(400);
+        throw new Error('Please enter username and password');
+    }
+
+    // Compare username and hashed password
+    const isUsernameCorrect = (username === SUPER_ADMIN_USERNAME);
+    const isPasswordCorrect = await bcrypt.compare(password, SUPER_ADMIN_PASSWORD_HASH);
+
+    if (isUsernameCorrect && isPasswordCorrect) {
+        // Construct a virtual admin object (not from DB)
+        const virtualAdmin = {
+            _id: SUPER_ADMIN_ID_PAYLOAD, // Unique ID for this admin
+            name: 'Super Administrator',
+            email: SUPER_ADMIN_USERNAME + '@admin.collegeconnect.com', // A unique admin email for display
+            role: 'admin', // Explicitly set role
+        };
+        // Generate token for this virtual admin
+        const token = generateToken(virtualAdmin._id);
+
+        res.json({
+            ...virtualAdmin, // Spread virtual admin properties
+            token,
+        });
+    } else {
+        res.status(401); // Unauthorized
+        throw new Error('Invalid Admin Credentials');
+    }
+});
+
+
+module.exports = { registerCollege, loginCollege, forgotPassword, resetPassword, adminLogin, }; // Export new function names

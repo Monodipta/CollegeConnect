@@ -6,7 +6,7 @@ const Notification = require('../models/Notification'); // To create notificatio
 // @desc    Create a new event
 // @route   POST /api/events
 // @access  Private (College only)
-const createEvent = asyncHandler(async (req, res) => {
+const createEvent = asyncHandler(async(req, res) => {
     const { title, description, eventType, location, dateTime, contactEmail, contactPhone, registrationLink } = req.body;
 
     // req.college is set by the 'protect' middleware
@@ -67,7 +67,7 @@ const createEvent = asyncHandler(async (req, res) => {
 // @desc    Get all events
 // @route   GET /api/events
 // @access  Private (College only)
-const getEvents = asyncHandler(async (req, res) => {
+const getEvents = asyncHandler(async(req, res) => {
     // You can add query parameters for filtering by type, date range, search, pagination later
     const events = await Event.find({})
         .populate('organizingCollege', 'name logo') // Populate organizer's name and logo
@@ -79,7 +79,7 @@ const getEvents = asyncHandler(async (req, res) => {
 // @desc    Get single event by ID
 // @route   GET /api/events/:id
 // @access  Private (College only)
-const getEventById = asyncHandler(async (req, res) => {
+const getEventById = asyncHandler(async(req, res) => {
     const event = await Event.findById(req.params.id)
         .populate('organizingCollege', 'name logo');
 
@@ -94,14 +94,14 @@ const getEventById = asyncHandler(async (req, res) => {
 // @desc    Update an event
 // @route   PUT /api/events/:id
 // @access  Private (College only - only organizer can update)
-const updateEvent = asyncHandler(async (req, res) => {
+const updateEvent = asyncHandler(async(req, res) => {
     const { title, description, eventType, location, dateTime, contactEmail, contactPhone, registrationLink } = req.body;
 
     const event = await Event.findById(req.params.id);
 
     if (event) {
         // Check if the logged-in college is the organizer
-        if (event.organizingCollege.toString() !== req.college._id.toString()) {
+        if (event.organizingCollege.toString() !== req.college._id.toString() || req.college.role !== 'admin') {
             res.status(401);
             throw new Error('Not authorized to update this event');
         }
@@ -126,12 +126,12 @@ const updateEvent = asyncHandler(async (req, res) => {
 // @desc    Delete an event
 // @route   DELETE /api/events/:id
 // @access  Private (College only - only organizer can delete)
-const deleteEvent = asyncHandler(async (req, res) => {
+const deleteEvent = asyncHandler(async(req, res) => {
     const event = await Event.findById(req.params.id);
 
     if (event) {
         // Check if the logged-in college is the organizer
-        if (event.organizingCollege.toString() !== req.college._id.toString()) {
+        if (event.organizingCollege.toString() !== req.college._id.toString() || req.college.role !== 'admin') {
             res.status(401);
             throw new Error('Not authorized to delete this event');
         }

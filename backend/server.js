@@ -4,8 +4,8 @@ const connectDB = require('./config/db');
 const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const collegeRoutes = require('./routes/collegeRoutes'); // NEW: Import college routes
-const resourceRoutes = require('./routes/resourceRoutes');     // NEW: Import resource routes
-const notificationRoutes = require('./routes/notificationRoutes'); 
+const resourceRoutes = require('./routes/resourceRoutes'); // NEW: Import resource routes
+const notificationRoutes = require('./routes/notificationRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const forumRoutes = require('./routes/forumRoutes');
 
@@ -25,7 +25,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Define API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/colleges', collegeRoutes); // NEW: Mount college routes
-app.use('/api/resources', resourceRoutes);         // NEW: Mount resource routes
+app.use('/api/resources', resourceRoutes); // NEW: Mount resource routes
 app.use('/api/notifications', notificationRoutes); // NEW: Mount notification routes
 app.use('/api/events', eventRoutes);
 app.use('/api/forum', forumRoutes);

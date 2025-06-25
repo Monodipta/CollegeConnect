@@ -1,8 +1,9 @@
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler'); // For handling async errors
 const College = require('../models/College'); // Our College model
+require('dotenv').config();
 
-const protect = asyncHandler(async (req, res, next) => {
+const protect = asyncHandler(async(req, res, next) => {
     let token;
 
     // Check if token exists in headers and starts with 'Bearer'
@@ -11,12 +12,25 @@ const protect = asyncHandler(async (req, res, next) => {
             // Get token from header (format: "Bearer TOKEN")
             token = req.headers.authorization.split(' ')[1];
 
-            // Verify token using our JWT_SECRET
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-            // Find the college by the ID in the token and attach it to the request
-            // .select('-password') prevents sending the hashed password
-            req.college = await College.findById(decoded.id).select('-password');
+            // Check if the decoded ID is our virtual super admin ID
+            if (decoded.id === process.env.SUPER_ADMIN_ID_PAYLOAD) {
+                req.college = {
+                    _id: process.env.SUPER_ADMIN_ID_PAYLOAD,
+                    name: 'Super Administrator',
+                    email: process.env.SUPER_ADMIN_USERNAME + '@admin.collegeconnect.com',
+                    role: 'admin',
+                };
+            } else {
+                // For regular college users, fetch from DB
+                req.college = await College.findById(decoded.id).select('-password -resetPasswordToken -resetPasswordExpire');
+            }
+
+            if (!req.college) { // If it's a regular user ID but not found in DB
+                res.status(401);
+                throw new Error('Not authorized, user not found');
+            }
 
             next(); // Proceed to the next middleware or route handler
         } catch (error) {
